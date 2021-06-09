@@ -1,36 +1,55 @@
 package com.safetynet.SafetyNet.Alert.System.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.safetynet.SafetyNet.Alert.System.model.DataModel;
-import com.safetynet.SafetyNet.Alert.System.model.Person;
+import com.safetynet.SafetyNet.Alert.System.model.FireStation;
+import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
+import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.List;
+
 @Service
 public class FireStationService {
 
-    public void writeFile(Person person) throws IOException {
+    private final ReadJsonFile readJsonFile;
+    private final WriteJsonFile writeJsonFile;
 
-        //create ObjectMapper instance
-        ObjectMapper objectMapper = new ObjectMapper();
+    public FireStationService(ReadJsonFile readJsonFile, WriteJsonFile writeJsonFile) {
+        this.readJsonFile = readJsonFile;
+        this.writeJsonFile = writeJsonFile;
+    }
 
-        File file = new File("src/main/resources/person2.json");
-        DataModel test = objectMapper.readValue(file, DataModel.class);
+    public void saveFireStation(FireStation fireStation) throws IOException {
+        DataModel dataModel = this.readJsonFile.readFile();
+        dataModel.getFirestations().add(fireStation);
+        this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
+    }
 
-        if(person != null){
-            long count = test.getPersons().stream().filter(o -> o.getFirstName().equals(person.getFirstName()) && o.getLastName().equals(person.getLastName())).count();
+    public void updateFireStation(FireStation fireStation, String station, String address) throws IOException {
+        DataModel dataModel = this.readJsonFile.readFile();
 
-            if(count == 0) {
-                test.getPersons().add(person);
+        for (int i = 0; i < dataModel.getFirestations().size(); i++){
+            dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
+            if (i == 1){
+                break;
             }
+            dataModel.getFirestations().add(fireStation);
         }
+        this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
+    }
 
-        //configure objectMapper for pretty input
-        objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+    public List<FireStation> getFireStation() throws IOException {
+        return readJsonFile.readFile().getFirestations();
+    }
 
-        //write customerObj object to person2.json file
-        objectMapper.writeValue(file, test);
+    public void deleteFireStation(String station, String address) throws IOException {
+        DataModel dataModel = this.readJsonFile.readFile();
+
+        for (int i = 0; i < dataModel.getFirestations().size(); i++){
+            dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
+
+        }
+        this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
     }
 }

@@ -5,9 +5,9 @@ import lombok.Data;
 import java.util.List;
 @Data
 public class MedicalRecords {
-    private String firstname;
+    private String firstName;
     private String lastName;
-    private String birthDate;
+    private String birthdate;
     private List<String> medications;
     private List<String> allergies;
 }

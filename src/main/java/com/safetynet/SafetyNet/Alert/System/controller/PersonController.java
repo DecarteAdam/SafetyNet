@@ -38,9 +38,10 @@ public class PersonController {
         this.personService.updatePerson(person, firstName, lastName);
     }
 
-    /*@DeleteMapping("Person/{firstName}")
-    public String deletePerson(@PathVariable String firstName){
+    @DeleteMapping("Person")
+    public void deletePerson(@RequestParam("f") String firstName,
+                               @RequestParam("l") String lastName) throws IOException {
 
-        return personRepository.deletePerson(firstName);
-    }*/
+        personService.deletePerson(firstName, lastName);
+    }
 }
