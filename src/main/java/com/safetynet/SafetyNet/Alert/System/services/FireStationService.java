@@ -31,7 +31,7 @@ public class FireStationService {
 
         for (int i = 0; i < dataModel.getFirestations().size(); i++){
             dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
-            if (i == 1){
+            if (i == 1){ // FIXME: 09/06/2021 Object deleted but but not updated or created
                 break;
             }
             dataModel.getFirestations().add(fireStation);

@@ -31,7 +31,7 @@ public class PersonService {
 
         for (int i = 0; i < dataModel.getPersons().size(); i++){
             dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
-            if (i == 1){
+            if (i == 1){ // FIXME: 09/06/2021 Object deleted but but not updated or created
                 break;
             }
             dataModel.getPersons().add(person);

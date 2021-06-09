@@ -32,7 +32,7 @@ public class MedicalRecordsService {
 
         for (int i = 0; i < dataModel.getMedicalrecords().size(); i++){
             dataModel.getMedicalrecords().removeIf(f -> f.getFirstName().equals(firstname) && f.getLastName().equals(lastName));
-            if (i == 1){
+            if (i == 1){ // FIXME: 09/06/2021 Object deleted but but not updated or created
                 break;
             }
             dataModel.getMedicalrecords().add(medicalRecords);

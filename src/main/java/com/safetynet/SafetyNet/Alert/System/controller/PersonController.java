@@ -11,8 +11,6 @@ import java.util.List;
 @RequestMapping("/person")
 public class PersonController {
 
-
-
     private final PersonService personService;
 
     public PersonController(PersonService personService){
