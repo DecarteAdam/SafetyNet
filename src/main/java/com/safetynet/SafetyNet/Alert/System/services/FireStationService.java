@@ -29,13 +29,9 @@ public class FireStationService {
     public void updateFireStation(FireStation fireStation, String station, String address) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
-        for (int i = 0; i < dataModel.getFirestations().size(); i++){
-            dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
-            if (i == 1){ // FIXME: 09/06/2021 Object deleted but but not updated or created
-                break;
-            }
-            dataModel.getFirestations().add(fireStation);
-        }
+        dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
+
+        dataModel.getFirestations().add(fireStation);
         this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
     }
 
@@ -46,10 +42,9 @@ public class FireStationService {
     public void deleteFireStation(String station, String address) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
-        for (int i = 0; i < dataModel.getFirestations().size(); i++){
-            dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
 
-        }
+        dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
+
         this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
     }
 }

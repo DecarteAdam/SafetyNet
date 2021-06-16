@@ -29,13 +29,10 @@ public class PersonService {
     public void updatePerson(Person person, String firstName, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
-        for (int i = 0; i < dataModel.getPersons().size(); i++){
-            dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
-            if (i == 1){ // FIXME: 09/06/2021 Object deleted but but not updated or created
-                break;
-            }
-            dataModel.getPersons().add(person);
-        }
+
+        dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
+
+        dataModel.getPersons().add(person);
         this.writeJsonFile.writeFilePerson(dataModel.getPersons());
     }
 
@@ -46,10 +43,9 @@ public class PersonService {
     public void deletePerson(String firstName, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
-        for (int i = 0; i < dataModel.getPersons().size(); i++){
-            dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
 
-        }
+        dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
+
         this.writeJsonFile.writeFilePerson(dataModel.getPersons());
     }
 }

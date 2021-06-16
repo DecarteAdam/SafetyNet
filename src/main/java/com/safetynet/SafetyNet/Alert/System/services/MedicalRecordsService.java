@@ -30,13 +30,9 @@ public class MedicalRecordsService {
     public void updateMedicalRecords(MedicalRecords medicalRecords, String firstname, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
-        for (int i = 0; i < dataModel.getMedicalrecords().size(); i++){
-            dataModel.getMedicalrecords().removeIf(f -> f.getFirstName().equals(firstname) && f.getLastName().equals(lastName));
-            if (i == 1){ // FIXME: 09/06/2021 Object deleted but but not updated or created
-                break;
-            }
-            dataModel.getMedicalrecords().add(medicalRecords);
-        }
+        dataModel.getMedicalrecords().removeIf(f -> f.getFirstName().equals(firstname) && f.getLastName().equals(lastName));
+
+        dataModel.getMedicalrecords().add(medicalRecords);
         this.writeJsonFile.writeFileMedicalRecords(dataModel.getMedicalrecords());
     }
 
@@ -47,10 +43,8 @@ public class MedicalRecordsService {
     public void deleteMedicalRecords(String firstName, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
-        for (int i = 0; i < dataModel.getMedicalrecords().size(); i++){
-            dataModel.getMedicalrecords().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
+        dataModel.getMedicalrecords().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
 
-        }
         this.writeJsonFile.writeFileMedicalRecords(dataModel.getMedicalrecords());
     }
 
