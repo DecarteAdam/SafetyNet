@@ -25,22 +25,28 @@ public class FireStationController {
     }
 
     @PostMapping
-    public void saveFireStation(@RequestBody FireStation fireStation) throws IOException {
+    public FireStation saveFireStation(@RequestBody FireStation fireStation) throws IOException {
 
-        this.fireStationService.saveFireStation(fireStation);
+        return this.fireStationService.saveFireStation(fireStation);
     }
     @PutMapping
-    public void updatePerson(@RequestBody FireStation fireStation,
-                             @RequestParam("f") String firstName,
-                             @RequestParam("l") String lastName) throws IOException {
+    public FireStation updatePerson(@RequestBody FireStation fireStation,
+                             @RequestParam("s") String station,
+                             @RequestParam("a") String address) throws IOException {
 
-        this.fireStationService.updateFireStation(fireStation, firstName, lastName);
+        return this.fireStationService.updateFireStation(fireStation, station, address);
     }
 
     @DeleteMapping
-    public void deleteFireStation(@RequestParam("f") String firstName,
-                                  @RequestParam("l") String lastName) throws IOException {
+    public FireStation deleteFireStation(@RequestParam("s") String station,
+                                  @RequestParam("a") String address) throws IOException {
 
-        this.fireStationService.deleteFireStation(firstName, lastName);
+        return this.fireStationService.deleteFireStation(station, address);
+    }
+
+    @GetMapping("firestations")
+    public List<FireStation> getPersonsByStation(@RequestParam("stationNumber") String station) throws IOException {
+
+        return this.fireStationService.getFireStation();
     }
 }

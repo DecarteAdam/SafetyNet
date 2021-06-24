@@ -20,31 +20,32 @@ public class FireStationService {
         this.writeJsonFile = writeJsonFile;
     }
 
-    public void saveFireStation(FireStation fireStation) throws IOException {
+    public FireStation saveFireStation(FireStation fireStation) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
         dataModel.getFirestations().add(fireStation);
-        this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
+        return this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
     }
 
-    public void updateFireStation(FireStation fireStation, String station, String address) throws IOException {
+    public FireStation updateFireStation(FireStation fireStation, String station, String address) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
         dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
 
         dataModel.getFirestations().add(fireStation);
-        this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
+        return this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
     }
 
     public List<FireStation> getFireStation() throws IOException {
         return readJsonFile.readFile().getFirestations();
     }
 
-    public void deleteFireStation(String station, String address) throws IOException {
+    public FireStation deleteFireStation(String station, String address) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
+        if (dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address))){
+            return this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
+        }
 
-        dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address));
-
-        this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
+        return null;
     }
 }

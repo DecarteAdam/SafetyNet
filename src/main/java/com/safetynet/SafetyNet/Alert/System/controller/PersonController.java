@@ -17,29 +17,29 @@ public class PersonController {
         this.personService = personService;
     }
     // CRUD
-    @GetMapping("Persons")
+    @GetMapping("persons")
     public List<Person> getPerson() throws IOException {
 
         return this.personService.getPersons();
     }
 
     @PostMapping
-    public void savePerson(@RequestBody Person person) throws IOException {
+    public Person savePerson(@RequestBody Person person) throws IOException {
 
-        this.personService.savePerson(person);
+        return this.personService.savePerson(person);
     }
-    @PutMapping("Person")
-    public void updatePerson(@RequestBody Person person,
+    @PutMapping("person")
+    public Person updatePerson(@RequestBody Person person,
                                @RequestParam("f") String firstName,
                                @RequestParam("l") String lastName) throws IOException {
 
-        this.personService.updatePerson(person, firstName, lastName);
+        return this.personService.updatePerson(person, firstName, lastName);
     }
 
-    @DeleteMapping("Person")
-    public void deletePerson(@RequestParam("f") String firstName,
+    @DeleteMapping("person")
+    public Person deletePerson(@RequestParam("f") String firstName,
                                @RequestParam("l") String lastName) throws IOException {
 
-        personService.deletePerson(firstName, lastName);
+        return this.personService.deletePerson(firstName, lastName);
     }
 }

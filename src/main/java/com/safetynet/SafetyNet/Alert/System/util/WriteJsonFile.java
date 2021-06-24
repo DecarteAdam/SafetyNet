@@ -19,7 +19,7 @@ public class WriteJsonFile {
     ObjectMapper objectMapper = new ObjectMapper();
     File file = new File("src/main/resources/person2.json");
 
-    public void writeFilePerson(List<Person> person) throws IOException {
+    public Person writeFilePerson(List<Person> person) throws IOException {
 
         //create ObjectMapper instance
         DataModel dataModel = objectMapper.readValue(file, DataModel.class);
@@ -32,9 +32,11 @@ public class WriteJsonFile {
 
         //write customerObj object to person2.json file
         objectMapper.writeValue(file, dataModel);
+
+        return dataModel.getPersons().get(dataModel.getPersons().size() -1);
     }
 
-    public void writeFileFireStation(List<FireStation> fireStations) throws IOException {
+    public FireStation writeFileFireStation(List<FireStation> fireStations) throws IOException {
 
         //create ObjectMapper instance
         DataModel dataModel = objectMapper.readValue(file, DataModel.class);
@@ -47,6 +49,8 @@ public class WriteJsonFile {
 
         //write customerObj object to person2.json file
         objectMapper.writeValue(file, dataModel);
+
+        return dataModel.getFirestations().get(dataModel.getFirestations().size() -1);
     }
 
     public void writeFileMedicalRecords(List<MedicalRecords> medicalRecords) throws IOException {
