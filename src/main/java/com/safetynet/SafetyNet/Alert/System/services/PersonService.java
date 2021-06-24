@@ -20,32 +20,37 @@ public class PersonService {
         this.writeJsonFile = writeJsonFile;
     }
 
-    public void savePerson(Person person) throws IOException {
+    public Person savePerson(Person person) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
         dataModel.getPersons().add(person);
         this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+        return person;
     }
 
-    public void updatePerson(Person person, String firstName, String lastName) throws IOException {
+    public Person updatePerson(Person person, String firstName, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
+        if (dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName))){
+            dataModel.getPersons().add(person);
+            return this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+        }
 
-        dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
+        return null;
 
-        dataModel.getPersons().add(person);
-        this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+
     }
 
     public List<Person> getPersons() throws IOException {
         return readJsonFile.readFile().getPersons();
     }
 
-    public void deletePerson(String firstName, String lastName) throws IOException {
+    public Person deletePerson(String firstName, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
+        if (dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName))){
+            return this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+        }
 
-        dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName));
-
-        this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+        return null;
     }
 }
