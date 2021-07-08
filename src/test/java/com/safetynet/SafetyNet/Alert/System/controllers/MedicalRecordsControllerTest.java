@@ -31,7 +31,7 @@ public class MedicalRecordsControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
+    /*@Test
     public void createNewMedicalRecord() throws Exception {
         MedicalRecords medicalRecords = new MedicalRecords();
         medicalRecords.setFirstName("Test");
@@ -41,9 +41,9 @@ public class MedicalRecordsControllerTest {
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(medicalRecords)))
                 .andExpect(status().isOk());
-    }
+    }*/
 
-    @Test
+   /* @Test
     public void updateMedicalRecords() throws Exception {
         MedicalRecords medicalRecords = new MedicalRecords();
         medicalRecords.setFirstName("Test");
@@ -55,7 +55,7 @@ public class MedicalRecordsControllerTest {
                 .param("l", medicalRecords.getLastName())
                 .content(objectMapper.writeValueAsString(medicalRecords)))
                 .andExpect(status().isOk());
-    }
+    }*/
 
     @Test
     public void deleteMedicalRecord() throws Exception {

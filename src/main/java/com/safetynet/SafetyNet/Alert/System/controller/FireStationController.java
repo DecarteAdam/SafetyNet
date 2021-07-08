@@ -1,11 +1,15 @@
 package com.safetynet.SafetyNet.Alert.System.controller;
 
 import com.safetynet.SafetyNet.Alert.System.model.FireStation;
+import com.safetynet.SafetyNet.Alert.System.model.MedicalRecords;
+import com.safetynet.SafetyNet.Alert.System.model.Person;
 import com.safetynet.SafetyNet.Alert.System.services.FireStationService;
+import org.hibernate.mapping.Any;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/firestations")
@@ -18,7 +22,7 @@ public class FireStationController {
     }
 
     // CRUD
-    @GetMapping("firestations")
+    @GetMapping
     public List<FireStation> getFireStations() throws IOException {
 
         return this.fireStationService.getFireStation();
@@ -45,8 +49,8 @@ public class FireStationController {
     }
 
     @GetMapping("firestations")
-    public List<FireStation> getPersonsByStation(@RequestParam("stationNumber") String station) throws IOException {
+    public Map<String, Object> getPersonsByStation(@RequestParam("stationNumber") String stationNumber) throws IOException {
 
-        return this.fireStationService.getFireStation();
+        return this.fireStationService.getPersonsByStation(stationNumber);
     }
 }
