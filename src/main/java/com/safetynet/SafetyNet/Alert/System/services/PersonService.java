@@ -1,6 +1,8 @@
 package com.safetynet.SafetyNet.Alert.System.services;
 
 import com.safetynet.SafetyNet.Alert.System.model.DataModel;
+import com.safetynet.SafetyNet.Alert.System.model.FireStation;
+import com.safetynet.SafetyNet.Alert.System.model.MedicalRecords;
 import com.safetynet.SafetyNet.Alert.System.model.Person;
 import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;

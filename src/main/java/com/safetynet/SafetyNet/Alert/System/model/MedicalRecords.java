@@ -1,11 +1,17 @@
 package com.safetynet.SafetyNet.Alert.System.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
-@Data
+import java.util.Locale;
+
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class MedicalRecords {
