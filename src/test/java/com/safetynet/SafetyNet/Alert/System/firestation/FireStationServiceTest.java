@@ -3,6 +3,7 @@ package com.safetynet.SafetyNet.Alert.System.firestation;
 import com.safetynet.SafetyNet.Alert.System.model.DataModel;
 import com.safetynet.SafetyNet.Alert.System.model.FireStation;
 import com.safetynet.SafetyNet.Alert.System.services.FireStationService;
+import com.safetynet.SafetyNet.Alert.System.services.PersonService;
 import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.junit.jupiter.api.Assertions;
@@ -31,6 +32,8 @@ public class FireStationServiceTest {
     ReadJsonFile readJsonFile;
     @Mock
     WriteJsonFile writeJsonFile;
+    @Mock
+    PersonService personService;
 
     @BeforeEach
     private void setUpPerTest() {
@@ -48,7 +51,7 @@ public class FireStationServiceTest {
             when(readJsonFile.readFile()).thenReturn(dataModel);
 
 
-            fireStationService = new FireStationService(readJsonFile, writeJsonFile);
+            fireStationService = new FireStationService(readJsonFile, writeJsonFile, personService);
         } catch (Exception e) {
             e.printStackTrace();
             throw  new RuntimeException("Failed to set up test mock objects");
