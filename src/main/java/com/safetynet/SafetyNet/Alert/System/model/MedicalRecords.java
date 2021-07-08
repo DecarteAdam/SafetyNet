@@ -15,9 +15,55 @@ import java.util.Locale;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MedicalRecords {
+
+
     private String firstName;
     private String lastName;
-    private String birthdate;
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private LocalDate birthdate;
     private List<String> medications;
     private List<String> allergies;
+
+
+    public LocalDate getBirthdate() {
+        return this.birthdate;
+    }
+
+    public void setBirthdate(String birthdate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        this.birthdate = LocalDate.parse(birthdate, formatter);
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public List<String> getMedications() {
+        return medications;
+    }
+
+    public List<String> getAllergies() {
+        return allergies;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setMedications(List<String> medications) {
+        this.medications = medications;
+    }
+
+    public void setAllergies(List<String> allergies) {
+        this.allergies = allergies;
+    }
 }
