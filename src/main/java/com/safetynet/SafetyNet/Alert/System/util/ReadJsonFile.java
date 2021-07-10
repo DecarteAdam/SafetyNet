@@ -1,4 +1,4 @@
-package com.safetynet.SafetyNet.Alert.System.services;
+package com.safetynet.SafetyNet.Alert.System.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.SafetyNet.Alert.System.model.DataModel;
@@ -18,6 +18,7 @@ public class ReadJsonFile {
         File file = new File("src/main/resources/person2.json");
 
         return objectMapper.readValue(file, DataModel.class);
-
     }
+
+
 }
