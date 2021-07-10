@@ -41,7 +41,7 @@ public class WriteJsonFile {
         //create ObjectMapper instance
         DataModel dataModel = objectMapper.readValue(file, DataModel.class);
 
-        dataModel.getMedicalrecords().clear();
+        dataModel.getFirestations().clear();
         dataModel.getFirestations().addAll(fireStations);
 
         //configure objectMapper for pretty input

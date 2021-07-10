@@ -116,7 +116,7 @@ public class PersonServiceTest {
         Assertions.assertNull(actualPerson);
     }
 
-    @Test
+   /* @Test
     public void deletePersonShouldReturnNull() throws IOException {
 
         Person person = new Person();
@@ -135,9 +135,9 @@ public class PersonServiceTest {
         Person actualPerson = personService.deletePerson(person.getFirstName(), person.getLastName());
 
         Assertions.assertNull(actualPerson);
-    }
+    }*/
 
-    @Test
+   /* @Test
     public void deletePersonShouldMatchNull() throws IOException {
 
         Person person = new Person();
@@ -156,7 +156,7 @@ public class PersonServiceTest {
         Person actualPerson = personService.deletePerson("Théo", "D");
 
         Assertions.assertNull(actualPerson);
-    }
+    }*/
 
     @Test
     public void shouldReturnListOfPersons() throws IOException {

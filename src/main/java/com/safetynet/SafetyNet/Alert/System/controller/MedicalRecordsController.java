@@ -17,30 +17,45 @@ public class MedicalRecordsController {
         this.medicalRecordsService = medicalRecordsService;
     }
 
-    // CRUD
+    /**
+     * Return all medical records from JSON
+     * @return List of medicalRecords
+     */
     @GetMapping
     public List<MedicalRecords> getMedicalRecord() throws IOException {
-
         return this.medicalRecordsService.getMedicalRecords();
     }
 
+    /**
+     * Save medical record into JSON
+     * @param medicalRecords The medicalRecord object to save
+     */
     @PostMapping
-    public void saveMedicalRecord(@RequestBody MedicalRecords medicalRecords) throws IOException {
-
-        this.medicalRecordsService.saveMedicalRecords(medicalRecords);
+    public MedicalRecords saveMedicalRecord(@RequestBody MedicalRecords medicalRecords) throws IOException {
+        return this.medicalRecordsService.saveMedicalRecords(medicalRecords);
     }
+
+    /**
+     * Update medical record in JSON
+     * @param medicalRecords The medical record object to update
+     * @param firstName The person's first name as id
+     * @param lastName The person's last name as id
+     */
     @PutMapping
-    public void updatePerson(@RequestBody MedicalRecords medicalRecords,
+    public void updateMedicalRecord(@RequestBody MedicalRecords medicalRecords,
                              @RequestParam("f") String firstName,
                              @RequestParam("l") String lastName) throws IOException {
-
         this.medicalRecordsService.updateMedicalRecords(medicalRecords, firstName, lastName);
     }
 
+    /**
+     * Delete medical record from JSON
+     * @param firstName The person's first name as id
+     * @param lastName The person's last name as id
+     */
     @DeleteMapping
-    public void deletePerson(@RequestParam("f") String firstName,
+    public void deleteMedicalRecord(@RequestParam("f") String firstName,
                              @RequestParam("l") String lastName) throws IOException {
-
         this.medicalRecordsService.deleteMedicalRecords(firstName, lastName);
     }
 }

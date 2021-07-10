@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +29,37 @@ public class PersonService {
         this.writeJsonFile = writeJsonFile;
     }
 
+    /**
+     * Return all persons from JSON
+     * @return The person
+     */
+    public List<Person> getPersons() throws IOException {
+        return readJsonFile.readFile().getPersons();
+    }
+
+    /**
+     * Save person into JSON
+     * @param person The object to save
+     * @return person object if saved.
+     * return null if person already exist
+     */
     public Person savePerson(Person person) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
+        if(dataModel.getPersons().contains(person)){
+            return null;
+        }
         dataModel.getPersons().add(person);
         this.writeJsonFile.writeFilePerson(dataModel.getPersons());
         return person;
     }
 
+    /**
+     * Update existing person
+     * @param person The person to update
+     * @param firstName The person's first name (used as id)
+     * @param lastName The person's last name (used as id)
+     * @return Person
+     */
     public Person updatePerson(Person person, String firstName, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
@@ -42,46 +67,56 @@ public class PersonService {
             dataModel.getPersons().add(person);
             return this.writeJsonFile.writeFilePerson(dataModel.getPersons());
         }
-
         return null;
-
-
     }
 
-    public List<Person> getPersons() throws IOException {
-        return readJsonFile.readFile().getPersons();
-    }
-
-    public Person deletePerson(String firstName, String lastName) throws IOException {
+    /**
+     * Delete person
+     * @param firstName The person's first name (used as id)
+     * @param lastName The person's last name (used as id)
+     */
+    public void deletePerson(String firstName, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
         if (dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName))) {
-            return this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+             this.writeJsonFile.writeFilePerson(dataModel.getPersons());
         }
 
-        return null;
     }
 
-    /*public List<Person> getChildren(String address) throws IOException {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -18);
-        Map<String, Object> persons = new HashMap<>();
+    public List<Object> getChildren(String address) throws IOException {
+       /* Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.YEAR, -18);*/
+        List<Object> list = new ArrayList<>();
 
         // Retrieve all persons from address
-        List<Person> childrenList =  readJsonFile.readFile().getPersons().stream().filter(a -> a.getAddress().equals(address)).collect(Collectors.toList());
+        Map<String, Person> personsList = readJsonFile.readFile().getPersons().stream().filter(f -> f.getAddress().equals(address))
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName(), Function.identity()));
 
-        // Retrieve medical records
-        List<MedicalRecords> medicalrecords = readJsonFile.readFile().getMedicalrecords();
+        /*Retrieve Medical records for persons*/
+        Map<String, MedicalRecords> medicalRecordsList = readJsonFile.readFile().getMedicalrecords()
+                .stream()
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName(), Function.identity()));
 
 
         // filter persons by by name in medical records
-        List<MedicalRecords> medList = medicalrecords.stream().filter(f -> childrenList.stream()
-                .map(Person::getLastName)
-                .anyMatch(n ->n.equals(f.getLastName())))
-                .collect(Collectors.toList());
+        personsList.forEach((key, person) -> {
+            if (medicalRecordsList.containsKey(key)) {
+                MedicalRecords medicalRecord = medicalRecordsList.get(key);
+                list.add(Map.of(
+                        "lastName", person.getLastName(),
+                        "firstName", person.getFirstName(),
+                        "age", getAge(medicalRecord.getBirthdate()),
+                        "members", Map.of(
+                                "medications", medicalRecord.getMedications(),
+                                "allergies", medicalRecord.getAllergies()
+                        )
+                ));
+            }
+        });
 
         // Find Persons <= 18 y/o
-        List<MedicalRecords> children = medList.stream().filter(b -> {
+       /* List<MedicalRecords> children = medList.stream().filter(b -> {
             try {
                 return b.getBirthdate().after(Date.from(cal.toInstant()));
             } catch (ParseException e) {
@@ -90,11 +125,16 @@ public class PersonService {
             return false;
         }).collect(Collectors.toList());
 
-        persons.put("Children", children);
+        persons.put("Children", children);*/
 
-        return persons;
-    }*/
+        return list;
+    }
 
+    /**
+     * Return a list of phone numbers of persons covered by fire station
+     * @param station The fire station number
+     * @return The list of phone numbers
+     */
     public List<String> getPhones(String station) throws IOException {
         //find fireStations by station number
         List<FireStation> fireStationList = readJsonFile.readFile().getFirestations()
@@ -107,16 +147,16 @@ public class PersonService {
     }
 
     /**
-     * @param address
-     * @return
-     * @throws IOException
+     * Return persons with medical records from given address and fire station numbers
+     * @param address The address of the persons
+     * @return list of persons
      */
     public List<Object> getPersonsFromFire(String address) throws IOException {
-        /*Retrieve persons from given address*/
+        /* Retrieve persons from given address */
         Map<String, Person> personsList = readJsonFile.readFile().getPersons().stream().filter(f -> f.getAddress().equals(address))
                 .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName(), Function.identity()));
 
-        /*Retrive firestation from given address*/
+        /* Retrieve firestation from given address*/
         List<FireStation> fireStations = readJsonFile.readFile().getFirestations().stream().filter(f -> f.getAddress().equals(address))
                 .collect(Collectors.toList());
 
@@ -127,10 +167,9 @@ public class PersonService {
 
         List<Object> list = new ArrayList<>();
 
-        personsList.entrySet().forEach(o -> {
-            if (medicalRecordsList.containsKey(o.getKey())) {
-                MedicalRecords medicalRecord = medicalRecordsList.get(o.getKey());
-                Person person = o.getValue();
+        personsList.forEach((key, person) -> {
+            if (medicalRecordsList.containsKey(key)) {
+                MedicalRecords medicalRecord = medicalRecordsList.get(key);
                 list.add(Map.of(
                         "lastName", person.getLastName(),
                         "firstName", person.getFirstName(),
@@ -144,10 +183,15 @@ public class PersonService {
             }
         });
 
+        /* Add fire stations at the end of the list */
+        list.add(fireStations.stream().map(FireStation::getStation));
+
         return list;
     }
 
-        public static int getAge (LocalDate dateOfBirth){
-            return Period.between(dateOfBirth, LocalDate.now()).getYears();
+        public static int getAge (String dateOfBirth){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/d/yyyy");
+        LocalDate localDate = LocalDate.parse(dateOfBirth, formatter);
+            return Period.between(localDate, LocalDate.now()).getYears();
         }
     }
