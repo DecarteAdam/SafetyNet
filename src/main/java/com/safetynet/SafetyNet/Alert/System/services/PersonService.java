@@ -161,9 +161,14 @@ public class PersonService {
         List<FireStation> fireStationList = readJsonFile.readFile().getFirestations()
                 .stream().filter(f -> f.getStation().equals(station))
                 .collect(Collectors.toList());
-        // FIXME: 11/07/2021 retrive persons from station address
+
+        List<Person> persons = readJsonFile.readFile().getPersons()
+                .stream()
+                .filter(f -> fireStationList.stream()
+                        .map(FireStation::getAddress)
+                        .anyMatch(a -> a.equals(f.getAddress()))).collect(Collectors.toList());
         /*Get user phone numbers*/
-        List<String> phoneNumbers = readJsonFile.readFile().getPersons().stream().map(Person::getPhone).collect(Collectors.toList());
+        List<String> phoneNumbers = persons.stream().map(Person::getPhone).collect(Collectors.toList());
         /*Return duplicate filtered user phone numbers*/
         return phoneNumbers.stream().distinct().collect(Collectors.toList());
     }
