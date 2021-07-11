@@ -1,8 +1,7 @@
-package com.safetynet.SafetyNet.Alert.System.person;
+package com.safetynet.SafetyNet.Alert.System.services;
 
 import com.safetynet.SafetyNet.Alert.System.model.DataModel;
 import com.safetynet.SafetyNet.Alert.System.model.Person;
-import com.safetynet.SafetyNet.Alert.System.services.PersonService;
 import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.junit.jupiter.api.Assertions;
@@ -14,13 +13,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
+
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
 public class PersonServiceTest {
@@ -61,7 +60,7 @@ public class PersonServiceTest {
     }
 
 
-    @Test
+
     public void shouldReturnPersons() throws IOException {
 
         Person person = new Person();
@@ -73,6 +72,10 @@ public class PersonServiceTest {
         person.setEmail("test@gmail.com");
         person.setPhone("+6 00 00 00 00");
 
+        List<Person> personList = new ArrayList<>();
+        personList.add(person);
+
+        when(writeJsonFile.writeFilePerson(personList)).thenReturn(person);
         Person actualPerson = personService.savePerson(person);
 
         Assertions.assertEquals(person, actualPerson);
@@ -116,7 +119,7 @@ public class PersonServiceTest {
         Assertions.assertNull(actualPerson);
     }
 
-   /* @Test
+
     public void deletePersonShouldReturnNull() throws IOException {
 
         Person person = new Person();
@@ -132,12 +135,12 @@ public class PersonServiceTest {
         personList.add(person);
 
         when(writeJsonFile.writeFilePerson(personList)).thenReturn(person);
-        Person actualPerson = personService.deletePerson(person.getFirstName(), person.getLastName());
+        personService.deletePerson(person.getFirstName(), person.getLastName());
 
-        Assertions.assertNull(actualPerson);
-    }*/
+        Assertions.assertEquals(personList.size(),  0);
+    }
 
-   /* @Test
+    @Test
     public void deletePersonShouldMatchNull() throws IOException {
 
         Person person = new Person();
@@ -153,10 +156,10 @@ public class PersonServiceTest {
         personList.add(person);
 
         when(writeJsonFile.writeFilePerson(personList)).thenReturn(person);
-        Person actualPerson = personService.deletePerson("Théo", "D");
+        personService.deletePerson("Théo", "D");
 
-        Assertions.assertNull(actualPerson);
-    }*/
+        Assertions.assertEquals(personList.size(), 1);
+    }
 
     @Test
     public void shouldReturnListOfPersons() throws IOException {

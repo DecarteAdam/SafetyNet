@@ -1,4 +1,3 @@
-/*
 package com.safetynet.SafetyNet.Alert.System.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,7 +5,6 @@ import com.safetynet.SafetyNet.Alert.System.controller.PersonController;
 import com.safetynet.SafetyNet.Alert.System.model.Person;
 import com.safetynet.SafetyNet.Alert.System.services.PersonService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -50,7 +48,7 @@ public class PersonControllerTest {
         person.setFirstName("Test");
         person.setLastName("Tester");
 
-        mockMvc.perform(put("/person/person")
+        mockMvc.perform(put("/person")
                 .contentType("application/json")
                 .param("f", person.getFirstName())
                 .param("l", person.getLastName())
@@ -60,10 +58,9 @@ public class PersonControllerTest {
 
     @Test
     public void deletePerson() throws Exception {
-        mockMvc.perform(delete("/person/person")
+        mockMvc.perform(delete("/person")
                 .param("f", "Test")
                 .param("l", "Tester"))
                 .andExpect(status().isOk());
     }
 }
-*/

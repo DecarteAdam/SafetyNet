@@ -9,14 +9,13 @@ import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.safetynet.SafetyNet.Alert.System.model.MedicalRecords.getAge;
 
 @Service
 public class PersonService {
@@ -31,6 +30,7 @@ public class PersonService {
 
     /**
      * Return all persons from JSON
+     *
      * @return The person
      */
     public List<Person> getPersons() throws IOException {
@@ -39,13 +39,14 @@ public class PersonService {
 
     /**
      * Save person into JSON
+     *
      * @param person The object to save
      * @return person object if saved.
      * return null if person already exist
      */
     public Person savePerson(Person person) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
-        if(dataModel.getPersons().contains(person)){
+        if (dataModel.getPersons().contains(person)) {
             return null;
         }
         dataModel.getPersons().add(person);
@@ -55,9 +56,10 @@ public class PersonService {
 
     /**
      * Update existing person
-     * @param person The person to update
+     *
+     * @param person    The person to update
      * @param firstName The person's first name (used as id)
-     * @param lastName The person's last name (used as id)
+     * @param lastName  The person's last name (used as id)
      * @return Person
      */
     public Person updatePerson(Person person, String firstName, String lastName) throws IOException {
@@ -72,21 +74,26 @@ public class PersonService {
 
     /**
      * Delete person
+     *
      * @param firstName The person's first name (used as id)
-     * @param lastName The person's last name (used as id)
+     * @param lastName  The person's last name (used as id)
      */
     public void deletePerson(String firstName, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
         if (dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName))) {
-             this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+            this.writeJsonFile.writeFilePerson(dataModel.getPersons());
         }
 
     }
 
+    /**
+     * Return children with other family members
+     *
+     * @param address The child address
+     * @return List of children with their members
+     */
     public List<Object> getChildren(String address) throws IOException {
-       /* Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -18);*/
         List<Object> list = new ArrayList<>();
 
         // Retrieve all persons from address
@@ -103,31 +110,45 @@ public class PersonService {
         personsList.forEach((key, person) -> {
             if (medicalRecordsList.containsKey(key)) {
                 MedicalRecords medicalRecord = medicalRecordsList.get(key);
-                list.add(Map.of(
-                        "lastName", person.getLastName(),
-                        "firstName", person.getFirstName(),
-                        "age", getAge(medicalRecord.getBirthdate()),
-                        "members", Map.of(
-                                "medications", medicalRecord.getMedications(),
-                                "allergies", medicalRecord.getAllergies()
-                        )
-                ));
+                if (getAge(medicalRecord.getBirthdate()) < 18) {
+                    list.add(Map.of(
+                            "lastName", person.getLastName(),
+                            "firstName", person.getFirstName(),
+                            "age", getAge(medicalRecord.getBirthdate()),
+                            "members", members(medicalRecordsList, personsList)
+                    ));
+                }
+
             }
         });
 
-        // Find Persons <= 18 y/o
-       /* List<MedicalRecords> children = medList.stream().filter(b -> {
-            try {
-                return b.getBirthdate().after(Date.from(cal.toInstant()));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }).collect(Collectors.toList());
-
-        persons.put("Children", children);*/
-
         return list;
+    }
+
+    /**
+     * Resolve members of the children
+     *
+     * @param medicalRecords The medical records of the family
+     * @param persons        The members of the family
+     * @return List of adult members of the family
+     */
+    public List<Object> members(Map<String, MedicalRecords> medicalRecords, Map<String, Person> persons) {
+        List<Object> members = new ArrayList<>();
+
+        persons.forEach((key, person) -> {
+            if (medicalRecords.containsKey(key)) {
+                MedicalRecords medicalRecord = medicalRecords.get(key);
+                if (getAge(medicalRecord.getBirthdate()) > 18) {
+                    members.add(Map.of(
+                            "lastName", person.getLastName(),
+                            "firstName", person.getFirstName(),
+                            "age", getAge(medicalRecord.getBirthdate())
+                    ));
+                }
+
+            }
+        });
+        return members;
     }
 
     /**
@@ -140,6 +161,7 @@ public class PersonService {
         List<FireStation> fireStationList = readJsonFile.readFile().getFirestations()
                 .stream().filter(f -> f.getStation().equals(station))
                 .collect(Collectors.toList());
+        // FIXME: 11/07/2021 retrive persons from station address
         /*Get user phone numbers*/
         List<String> phoneNumbers = readJsonFile.readFile().getPersons().stream().map(Person::getPhone).collect(Collectors.toList());
         /*Return duplicate filtered user phone numbers*/
@@ -148,6 +170,7 @@ public class PersonService {
 
     /**
      * Return persons with medical records from given address and fire station numbers
+     *
      * @param address The address of the persons
      * @return list of persons
      */
@@ -188,10 +211,4 @@ public class PersonService {
 
         return list;
     }
-
-        public static int getAge (String dateOfBirth){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/d/yyyy");
-        LocalDate localDate = LocalDate.parse(dateOfBirth, formatter);
-            return Period.between(localDate, LocalDate.now()).getYears();
-        }
-    }
+}
