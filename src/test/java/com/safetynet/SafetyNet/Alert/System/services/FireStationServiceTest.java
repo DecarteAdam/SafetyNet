@@ -1,8 +1,7 @@
-package com.safetynet.SafetyNet.Alert.System.firestation;
+package com.safetynet.SafetyNet.Alert.System.services;
 
 import com.safetynet.SafetyNet.Alert.System.model.DataModel;
 import com.safetynet.SafetyNet.Alert.System.model.FireStation;
-import com.safetynet.SafetyNet.Alert.System.services.FireStationService;
 import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.junit.jupiter.api.Assertions;
