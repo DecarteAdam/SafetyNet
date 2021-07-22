@@ -53,7 +53,7 @@ public class WriteJsonFile {
         return dataModel.getFirestations().get(dataModel.getFirestations().size() -1);
     }
 
-    public void writeFileMedicalRecords(List<MedicalRecords> medicalRecords) throws IOException {
+    public MedicalRecords writeFileMedicalRecords(List<MedicalRecords> medicalRecords) throws IOException {
 
         //create ObjectMapper instance
         DataModel dataModel = objectMapper.readValue(file, DataModel.class);
@@ -66,6 +66,8 @@ public class WriteJsonFile {
 
         //write customerObj object to person2.json file
         objectMapper.writeValue(file, dataModel);
+
+        return dataModel.getMedicalrecords().get(dataModel.getMedicalrecords().size() -1);
     }
 
 }
