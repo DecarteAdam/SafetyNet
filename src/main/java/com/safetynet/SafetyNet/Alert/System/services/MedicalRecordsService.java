@@ -49,13 +49,14 @@ public class MedicalRecordsService {
      * @param firstname The persons first name used  as id
      * @param lastName The persons last name used as id
      */
-    public void updateMedicalRecords(MedicalRecords medicalRecords, String firstname, String lastName) throws IOException {
+    public MedicalRecords updateMedicalRecords(MedicalRecords medicalRecords, String firstname, String lastName) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
         dataModel.getMedicalrecords().removeIf(f -> f.getFirstName().equals(firstname) && f.getLastName().equals(lastName));
 
         dataModel.getMedicalrecords().add(medicalRecords);
         this.writeJsonFile.writeFileMedicalRecords(dataModel.getMedicalrecords());
+        return medicalRecords;
     }
 
 
