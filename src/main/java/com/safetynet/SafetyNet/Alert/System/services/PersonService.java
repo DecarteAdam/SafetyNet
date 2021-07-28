@@ -1,9 +1,6 @@
 package com.safetynet.SafetyNet.Alert.System.services;
 
-import com.safetynet.SafetyNet.Alert.System.model.DataModel;
-import com.safetynet.SafetyNet.Alert.System.model.FireStation;
-import com.safetynet.SafetyNet.Alert.System.model.MedicalRecords;
-import com.safetynet.SafetyNet.Alert.System.model.Person;
+import com.safetynet.SafetyNet.Alert.System.model.*;
 import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.springframework.stereotype.Service;
@@ -12,16 +9,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.safetynet.SafetyNet.Alert.System.model.MedicalRecords.getAge;
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class PersonService {
 
     private final ReadJsonFile readJsonFile;
     private final WriteJsonFile writeJsonFile;
+    private final List<Object> persons = new ArrayList<>();
+
+    /*Increments for duplicate names*/
+    private final AtomicInteger counterForPersons = new AtomicInteger(1);
+    private final AtomicInteger counterForMedical = new AtomicInteger(1);
 
     public PersonService(ReadJsonFile readJsonFile, WriteJsonFile writeJsonFile) {
         this.readJsonFile = readJsonFile;
@@ -94,16 +98,24 @@ public class PersonService {
      * @return List of children with their members
      */
     public List<Object> getChildren(String address) throws IOException {
-        List<Object> list = new ArrayList<>();
+
 
         // Retrieve all persons from address
-        Map<String, Person> personsList = readJsonFile.readFile().getPersons().stream().filter(f -> f.getAddress().equals(address))
-                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName(), Function.identity()));
+        Map<String, Person> personsList = readJsonFile.readFile().getPersons()
+                .stream()
+                .filter(f -> f.getAddress().equals(address))
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName() + counterForPersons.getAndIncrement(), Function.identity()));
+
+        List<Person> personList = readJsonFile.readFile().getPersons().stream()
+                .filter(p -> p.getAddress().equals(address))
+                .collect(Collectors.toList());
 
         /*Retrieve Medical records for persons*/
         Map<String, MedicalRecords> medicalRecordsList = readJsonFile.readFile().getMedicalrecords()
                 .stream()
-                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName(), Function.identity()));
+                .filter(m -> personList.stream()
+                        .anyMatch(p -> p.getFirstName().equals(m.getFirstName()) && p.getLastName().equals(m.getLastName())))
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName() + counterForMedical.getAndIncrement(), Function.identity()));
 
 
         // filter persons by by name in medical records
@@ -111,7 +123,7 @@ public class PersonService {
             if (medicalRecordsList.containsKey(key)) {
                 MedicalRecords medicalRecord = medicalRecordsList.get(key);
                 if (getAge(medicalRecord.getBirthdate()) < 18) {
-                    list.add(Map.of(
+                    persons.add(Map.of(
                             "lastName", person.getLastName(),
                             "firstName", person.getFirstName(),
                             "age", getAge(medicalRecord.getBirthdate()),
@@ -122,7 +134,7 @@ public class PersonService {
             }
         });
 
-        return list;
+        return persons;
     }
 
     /**
@@ -181,24 +193,27 @@ public class PersonService {
      */
     public List<Object> getPersonsFromFire(String address) throws IOException {
         /* Retrieve persons from given address */
-        Map<String, Person> personsList = readJsonFile.readFile().getPersons().stream().filter(f -> f.getAddress().equals(address))
-                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName(), Function.identity()));
+        Map<String, Person> personsList = readJsonFile.readFile().getPersons()
+                .stream()
+                .filter(f -> f.getAddress().equals(address))
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName() + counterForPersons.getAndIncrement(), Function.identity()));
 
-        /* Retrieve firestation from given address*/
-        List<FireStation> fireStations = readJsonFile.readFile().getFirestations().stream().filter(f -> f.getAddress().equals(address))
+        List<Person> personList = readJsonFile.readFile().getPersons().stream()
+                .filter(p -> p.getAddress().equals(address))
                 .collect(Collectors.toList());
 
         /*Retrieve Medical records for persons*/
         Map<String, MedicalRecords> medicalRecordsList = readJsonFile.readFile().getMedicalrecords()
                 .stream()
-                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName(), Function.identity()));
+                .filter(m -> personList.stream()
+                        .anyMatch(p -> p.getFirstName().equals(m.getFirstName()) && p.getLastName().equals(m.getLastName())))
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName() + counterForMedical.getAndIncrement(), Function.identity()));
 
-        List<Object> list = new ArrayList<>();
 
         personsList.forEach((key, person) -> {
             if (medicalRecordsList.containsKey(key)) {
                 MedicalRecords medicalRecord = medicalRecordsList.get(key);
-                list.add(Map.of(
+                persons.add(Map.of(
                         "lastName", person.getLastName(),
                         "firstName", person.getFirstName(),
                         "phoneNumber", person.getPhone(),
@@ -211,9 +226,110 @@ public class PersonService {
             }
         });
 
-        /* Add fire stations at the end of the list */
-        list.add(fireStations.stream().map(FireStation::getStation));
+        /* Retrieve firestation from given address*/
+        List<FireStation> fireStations = readJsonFile.readFile().getFirestations().stream().filter(f -> f.getAddress().equals(address))
+                .collect(Collectors.toList());
 
-        return list;
+        /* Add fire stations at the end of the list */
+        persons.add(fireStations.stream().map(FireStation::getStation));
+
+        return persons;
+    }
+
+    public Map<String,List<PersonWithMedicalRecords>> getPersonsFromFlood(List<String> stations) throws IOException {
+        List<PersonWithMedicalRecords> list = new ArrayList<>();
+
+        //find fireStations by station number
+        List<FireStation> fireStations = readJsonFile.readFile().getFirestations().stream()
+                .filter(s -> stations.contains(s.getStation()))
+                .collect(Collectors.toList());
+
+
+        /* Retrieve persons from given address */
+        Map<String, Person> persons = readJsonFile.readFile().getPersons().stream()
+                .filter(p -> fireStations.stream()
+                        .anyMatch(ps -> ps.getAddress().equals(p.getAddress())))
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName() + counterForPersons.getAndIncrement(), Function.identity()));
+
+        List<Person> personsList = readJsonFile.readFile().getPersons().stream()
+                .filter(p -> fireStations.stream()
+                        .anyMatch(ps -> ps.getAddress().equals(p.getAddress())))
+                .collect(Collectors.toList());
+
+        /*Retrieve Medical records for persons*/
+        Map<String, MedicalRecords> medicalRecordsList = readJsonFile.readFile().getMedicalrecords()
+                .stream()
+                .filter(m -> personsList.stream()
+                        .anyMatch(p -> p.getFirstName().equals(m.getFirstName()) && p.getLastName().equals(m.getLastName())))
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName() + counterForMedical.getAndIncrement(), Function.identity()));
+
+
+
+                persons.forEach((key, person) -> {
+            if (medicalRecordsList.containsKey(key)) {
+                MedicalRecords medicalRecord = medicalRecordsList.get(key);
+                list.add(new PersonWithMedicalRecords(
+                        person.getFirstName(),
+                        person.getLastName(),
+                        person.getAddress(),
+                        person.getCity(),
+                        person.getZip(),
+                        person.getPhone(),
+                        person.getEmail(),
+                        getAge(medicalRecord.getBirthdate()),
+                        medicalRecord.getBirthdate(),
+                        medicalRecord.getMedications(),
+                        medicalRecord.getAllergies()));
+            }
+        });
+
+               return list.stream().collect(groupingBy(PersonWithMedicalRecords::getAddress));
+
+    }
+
+    public List<Object> personInfo(String firstName, String lastName)  throws IOException {
+        /* Retrieve persons from given address */
+        Map<String, Person> personMap = readJsonFile.readFile().getPersons()
+                .stream()
+                .filter(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName))
+                .collect(Collectors.toMap(person -> person.getFirstName() + person.getLastName() + counterForPersons.getAndIncrement(), Function.identity()));
+
+        /*Retrieve Medical records for persons*/
+        Map<String, MedicalRecords> medicalRecordsMap = readJsonFile.readFile().getMedicalrecords()
+                .stream()
+                .filter(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName))
+                .collect(Collectors.toMap(o -> o.getFirstName() + o.getLastName() + counterForMedical.getAndIncrement(), Function.identity()));
+
+
+        personMap.forEach((key, person) -> {
+            if (medicalRecordsMap.containsKey(key)) {
+                MedicalRecords medicalRecord = medicalRecordsMap.get(key);
+                persons.add(Map.of(
+                        "lastName", person.getLastName(),
+                        "firstName", person.getFirstName(),
+                        "address", person.getAddress(),
+                        "age", getAge(medicalRecord.getBirthdate()),
+                        "email", person.getEmail(),
+                        "medicalRecords", Map.of(
+                                "medications", medicalRecord.getMedications(),
+                                "allergies", medicalRecord.getAllergies()
+                        )
+                ));
+            }
+        });
+
+        return persons;
+    }
+
+
+    public List<String> communityEmail(String city) throws IOException {
+
+        /* Retrieve persons from given city */
+
+        return readJsonFile.readFile().getPersons()
+                .stream()
+                .filter(f -> f.getCity().equals(city))
+                .map(Person::getEmail)
+                .collect(Collectors.toList());
     }
 }
