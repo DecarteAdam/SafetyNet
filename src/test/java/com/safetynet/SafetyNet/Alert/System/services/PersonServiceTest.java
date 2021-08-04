@@ -6,6 +6,7 @@ import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,7 +62,9 @@ public class PersonServiceTest {
 
 
 
-    public void shouldReturnPersons() throws IOException {
+    @Test
+    @DisplayName("Should return NULL because fire station already exist in JSON file")
+    public void saveIfExist() throws IOException {
 
         Person person = new Person();
         person.setFirstName("Adam");
@@ -71,11 +74,33 @@ public class PersonServiceTest {
         person.setCity("Strasbourg");
         person.setEmail("test@gmail.com");
         person.setPhone("+6 00 00 00 00");
-
         List<Person> personList = new ArrayList<>();
         personList.add(person);
 
         when(writeJsonFile.writeFilePerson(personList)).thenReturn(person);
+
+        Person actualPerson = personService.savePerson(person);
+
+        Assertions.assertNull(actualPerson);
+    }
+
+    @Test
+    @DisplayName("Should return Fire station")
+    public void saveFireStation() throws IOException {
+
+        Person person = new Person();
+        person.setFirstName("Théo");
+        person.setLastName("Decarte");
+        person.setAddress("5 rue Lauth");
+        person.setZip("67000");
+        person.setCity("Strasbourg");
+        person.setEmail("test@gmail.com");
+        person.setPhone("+6 00 00 00 00");
+        List<Person> personList = new ArrayList<>();
+        personList.add(person);
+
+        when(writeJsonFile.writeFilePerson(personList)).thenReturn(person);
+
         Person actualPerson = personService.savePerson(person);
 
         Assertions.assertEquals(person, actualPerson);

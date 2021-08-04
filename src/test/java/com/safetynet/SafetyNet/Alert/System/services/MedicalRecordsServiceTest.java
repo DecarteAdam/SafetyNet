@@ -2,11 +2,11 @@ package com.safetynet.SafetyNet.Alert.System.services;
 
 import com.safetynet.SafetyNet.Alert.System.model.DataModel;
 import com.safetynet.SafetyNet.Alert.System.model.MedicalRecords;
-import com.safetynet.SafetyNet.Alert.System.model.Person;
 import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -75,6 +75,26 @@ public class MedicalRecordsServiceTest {
         Assertions.assertEquals(medicalRecord, actual);
     }
 
+    /*@Test
+    public void saveMedicalRecordIfExist() throws IOException {
+
+        MedicalRecords medicalRecord = new MedicalRecords();
+        medicalRecord.setFirstName("Eric");
+        medicalRecord.setLastName("Cadigan");
+        medicalRecord.setBirthdate("03/06/1994");
+        medicalRecord.setMedications(new ArrayList<>());
+        medicalRecord.setAllergies(new ArrayList<>());
+
+
+        List<MedicalRecords> medicalRecordsList = new ArrayList<>();
+        medicalRecordsList.add(medicalRecord);
+
+        when(writeJsonFile.writeFileMedicalRecords(medicalRecordsList)).thenReturn(medicalRecord);
+        MedicalRecords actual = medicalRecordsService.saveMedicalRecords(medicalRecord);
+
+        Assertions.assertEquals(medicalRecord, actual);
+    }*/
+
     @Test
     public void updatePerson() throws IOException {
 
@@ -110,46 +130,32 @@ public class MedicalRecordsServiceTest {
     }
 
 
-   /* public void deletePersonShouldReturnNull() throws IOException {
-
-        Person person = new Person();
-        person.setFirstName("Adam");
-        person.setLastName("Decarte");
-        person.setAddress("5 rue Lauth");
-        person.setZip("67000");
-        person.setCity("Strasbourg");
-        person.setEmail("test@gmail.com");
-        person.setPhone("+6 00 00 00 00");
-
-        List<Person> personList = new ArrayList<>();
-        personList.add(person);
-
-        when(writeJsonFile.writeFilePerson(personList)).thenReturn(person);
-        personService.deletePerson(person.getFirstName(), person.getLastName());
-
-        Assertions.assertEquals(personList.size(),  0);
-    }*/
-
    /* @Test
-    public void deletePersonShouldMatchNull() throws IOException {
+    @DisplayName("Delete Medical record")
+    public void delete() throws IOException {
 
-        Person person = new Person();
-        person.setFirstName("Adam");
-        person.setLastName("Decarte");
-        person.setAddress("5 rue Lauth");
-        person.setZip("67000");
-        person.setCity("Strasbourg");
-        person.setEmail("test@gmail.com");
-        person.setPhone("+6 00 00 00 00");
+        MedicalRecords medicalRecord = new MedicalRecords();
+        medicalRecord.setFirstName("Clive");
+        medicalRecord.setLastName("Ferguson");
+        medicalRecord.setBirthdate("08/28/1992");
 
-        List<Person> personList = new ArrayList<>();
-        personList.add(person);
+        List<MedicalRecords> medicalRecordsList = new ArrayList<>();
+        medicalRecordsList.add(medicalRecord);
 
-        when(writeJsonFile.writeFilePerson(personList)).thenReturn(person);
-        personService.deletePerson("Théo", "D");
+        when(writeJsonFile.writeFileMedicalRecords(medicalRecordsList)).thenReturn(medicalRecord);
+        medicalRecordsService.deleteMedicalRecords(medicalRecord.getFirstName(), medicalRecord.getLastName());
 
-        Assertions.assertEquals(personList.size(), 1);
+        Assertions.assertEquals(medicalRecordsList.size(),  0);
     }*/
+
+    @Test
+    @DisplayName("Get all Medical records from JSON")
+    public void getMedicalRecords() throws IOException {
+
+        List<MedicalRecords> medicalRecords = this.medicalRecordsService.getMedicalRecords();
+
+        Assertions.assertEquals(medicalRecords.size(), 1);
+    }
 
     /*@Test
     public void shouldReturnListOfPersons() throws IOException {
