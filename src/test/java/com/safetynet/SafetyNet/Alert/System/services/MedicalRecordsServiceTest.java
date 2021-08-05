@@ -14,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
+@ActiveProfiles("test")
 public class MedicalRecordsServiceTest {
 
     @InjectMocks
@@ -31,6 +34,9 @@ public class MedicalRecordsServiceTest {
      ReadJsonFile readJsonFile;
     @Autowired
      WriteJsonFile writeJsonFile;
+
+    File testWrite = new File("src/main/resources/test.json");
+    File testRead = new File("src/main/resources/data-test.json");
 
     @BeforeEach
     private void setUpPerTest() {

@@ -23,30 +23,7 @@ public class WriteJsonFileTest {
     @Autowired
     WriteJsonFile writeJsonFile;
 
-    /*@BeforeEach
-    private void setUpPerTest() {
-        try {
-            FireStation fireStation = new FireStation();
-            fireStation.setStation("1");
-            fireStation.setAddress("5 rue Lauth");
 
-            List<FireStation> fireStations = new ArrayList<>();
-            fireStations.add(fireStation);
-
-            DataModel dataModel = new DataModel();
-            dataModel.setFirestations(fireStations);
-
-            when(readJsonFile.readFile()).thenReturn(dataModel);
-
-
-            fireStationService = new FireStationService(readJsonFile, writeJsonFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw  new RuntimeException("Failed to set up test mock objects");
-        }
-    }*/
-
-    @Test
     public void writePeron() throws IOException {
         Person person = new Person();
         person.setFirstName("Eric");
@@ -63,7 +40,7 @@ public class WriteJsonFileTest {
         Assertions.assertEquals(addedPerson.getLastName(), dataModel.getPersons().get(0).getLastName());
     }
 
-    @Test
+
     public void writeFireStation() throws IOException {
         FireStation fireStation = new FireStation();
         fireStation.setStation("3");
@@ -80,7 +57,7 @@ public class WriteJsonFileTest {
         Assertions.assertEquals(addedFirestation.getStation(), dataModel.getFirestations().get(0).getStation());
     }
 
-    @Test
+
     public void writeMedicalRecords() throws IOException {
         MedicalRecords medicalRecords = new MedicalRecords();
         medicalRecords.setFirstName("Eric");
