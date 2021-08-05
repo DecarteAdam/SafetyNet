@@ -1,9 +1,6 @@
 package com.safetynet.SafetyNet.Alert.System.services;
 
-import com.safetynet.SafetyNet.Alert.System.model.DataModel;
 import com.safetynet.SafetyNet.Alert.System.model.FireStation;
-import com.safetynet.SafetyNet.Alert.System.model.MedicalRecords;
-import com.safetynet.SafetyNet.Alert.System.model.Person;
 import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.junit.jupiter.api.Assertions;
@@ -12,68 +9,34 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.mockito.Mockito.when;
+import java.util.stream.Collectors;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class FireStationServiceTest {
 
     @InjectMocks
-    FireStationService fireStationService;
-    @Mock
+    FireStationService service;
+    @Autowired
     ReadJsonFile readJsonFile;
-    @Mock
+    @Autowired
     WriteJsonFile writeJsonFile;
 
     @BeforeEach
     private void setUpPerTest() {
         try {
-            FireStation fireStation = new FireStation();
-            fireStation.setStation("1");
-            fireStation.setAddress("5 rue Lauth");
-
-            List<FireStation> fireStations = new ArrayList<>();
-            fireStations.add(fireStation);
-
-            Person person = new Person();
-            person.setFirstName("Adam");
-            person.setLastName("Decarte");
-            person.setAddress("5 rue Lauth");
-            person.setZip("67000");
-            person.setCity("Strasbourg");
-            person.setEmail("test@gmail.com");
-            person.setPhone("+6 00 00 00 00");
-
-            List<Person> persons = new ArrayList<>();
-            persons.add(person);
-
-            MedicalRecords medicalRecord = new MedicalRecords();
-            medicalRecord.setFirstName("Adam");
-            medicalRecord.setLastName("Decarte");
-            medicalRecord.setBirthdate("08/28/1992");
-
-            List<MedicalRecords> medicalRecordsList = new ArrayList<>();
-            medicalRecordsList.add(medicalRecord);
-
-            DataModel dataModel = new DataModel();
-            dataModel.setFirestations(fireStations);
-            dataModel.setPersons(persons);
-            dataModel.setMedicalrecords(medicalRecordsList);
-
-            when(readJsonFile.readFile()).thenReturn(dataModel);
-
-
-            fireStationService = new FireStationService(readJsonFile, writeJsonFile);
+            service = new FireStationService(readJsonFile, writeJsonFile);
         } catch (Exception e) {
             e.printStackTrace();
             throw  new RuntimeException("Failed to set up test mock objects");
@@ -87,17 +50,12 @@ public class FireStationServiceTest {
     public void saveIfExist() throws IOException {
 
         FireStation fireStation = new FireStation();
-        fireStation.setStation("1");
-        fireStation.setAddress("5 rue Lauth");
+        fireStation.setStation("3");
+        fireStation.setAddress("1509 Culver St");
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
+        FireStation actual = service.saveFireStation(fireStation);
 
-        when(writeJsonFile.writeFileFireStation(fireStations)).thenReturn(fireStation);
-
-        FireStation actualFireStation = fireStationService.saveFireStation(fireStation);
-
-        Assertions.assertNull(actualFireStation);
+        Assertions.assertNull(actual);
     }
 
     @Test
@@ -108,108 +66,121 @@ public class FireStationServiceTest {
         fireStation.setStation("2");
         fireStation.setAddress("6a rue Kruger");
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
+        FireStation actual = service.saveFireStation(fireStation);
 
-        when(writeJsonFile.writeFileFireStation(fireStations)).thenReturn(fireStation);
+        FireStation added = this.readJsonFile.readFile().getFirestations().get(this.readJsonFile.readFile().getFirestations().size() -1);
 
-        FireStation actualFireStation = fireStationService.saveFireStation(fireStation);
+        Assertions.assertEquals(added, actual);
 
-        Assertions.assertEquals(fireStation, actualFireStation);
+        /* Delete*/
+        this.service.deleteFireStation(fireStation.getStation(), fireStation.getAddress());
     }
 
     @Test
+    @DisplayName("Should return updated person")
     public void updateFireStation() throws IOException {
 
         FireStation fireStation = new FireStation();
-        fireStation.setStation("1");
-        fireStation.setAddress("5 rue Lauth");
+        fireStation.setStation("2");
+        fireStation.setAddress("1509 Culver St");
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
+        FireStation fireStationPrev = new FireStation();
+        fireStationPrev.setStation("3");
+        fireStationPrev.setAddress("1509 Culver St");
 
 
-        when(writeJsonFile.writeFileFireStation(fireStations)).thenReturn(fireStation);
+        FireStation actual = service.updateFireStation(fireStation, fireStationPrev.getStation(), fireStationPrev.getAddress());
 
-        FireStation actualFireStation = fireStationService.updateFireStation(fireStation, fireStation.getStation(), fireStation.getAddress());
+        List<FireStation> expected = this.readJsonFile.readFile().getFirestations()
+                .stream()
+                .filter(f -> f.getStation().equals(fireStation.getStation())
+                        &&
+                        f.getAddress().equals(fireStation.getAddress()))
+                .collect(Collectors.toList());
 
-        Assertions.assertEquals(fireStation, actualFireStation);
+        Assertions.assertEquals(expected.get(0), actual);
+
+        service.updateFireStation(fireStationPrev, fireStation.getStation(), fireStation.getAddress());
     }
 
     @Test
+    @DisplayName("Should return null because firestation doesn't exist")
     public void ShouldReturnEmpty() throws IOException {
         FireStation fireStation = new FireStation();
         fireStation.setStation("1");
         fireStation.setAddress("5 rue Lauth");
 
-
-        FireStation actualFireStation = fireStationService.updateFireStation(fireStation, "2", "D");
+        FireStation actualFireStation = service.updateFireStation(fireStation, "2", "D");
 
         Assertions.assertNull(actualFireStation);
     }
 
     @Test
+    @DisplayName("Should return empty list because fire station was deleted")
     public void deleteFireStationShouldReturnNull() throws IOException {
 
         FireStation fireStation = new FireStation();
         fireStation.setStation("1");
         fireStation.setAddress("5 rue Lauth");
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
+        List<FireStation> fireStationList = new ArrayList<>();
+        fireStationList.add(fireStation);
 
-        when(writeJsonFile.writeFileFireStation(fireStations)).thenReturn(fireStation);
-        FireStation actualFireStation = fireStationService.deleteFireStation(fireStation.getStation(), fireStation.getAddress());
+        service.saveFireStation(fireStation);
 
-        Assertions.assertNull(actualFireStation);
+        List<FireStation> exist = this.readJsonFile.readFile().getFirestations()
+                .stream()
+                .filter(f -> f.getStation().equals(fireStation.getStation())
+                        &&
+                        f.getAddress().equals(fireStation.getAddress()))
+                .collect(Collectors.toList());
+
+        Assertions.assertEquals(fireStationList.get(0), exist.get(0));
+
+        service.deleteFireStation(fireStation.getStation(), fireStation.getAddress());
+
+        List<FireStation> actual = this.readJsonFile.readFile().getFirestations()
+                .stream()
+                .filter(f -> f.getStation().equals(fireStation.getStation())
+                        &&
+                        f.getAddress().equals(fireStation.getAddress()))
+                .collect(Collectors.toList());
+
+        Assertions.assertEquals(0,  actual.size());
     }
 
     @Test
+    @DisplayName("Should return null because fire station doesn't exist")
     public void deleteFireStationShouldMatchNull() throws IOException {
 
-        FireStation fireStation = new FireStation();
-        fireStation.setStation("1");
-        fireStation.setAddress("5 rue Lauth");
+        service.deleteFireStation("8", "some address");
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
+        List<FireStation> actual = this.readJsonFile.readFile().getFirestations()
+                .stream()
+                .filter(f -> f.getStation().equals("8")
+                        &&
+                        f.getAddress().equals("some address"))
+                .collect(Collectors.toList());
 
-        when(writeJsonFile.writeFileFireStation(fireStations)).thenReturn(fireStation);
-        FireStation actualFireStation = fireStationService.deleteFireStation("9", "D");
-
-        Assertions.assertNull(actualFireStation);
+        Assertions.assertEquals(0,  actual.size());
     }
 
     @Test
-    public void shouldReturnListOfPersons() throws IOException {
+    @DisplayName("Should return list of all fire stations")
+    public void shouldReturnListOfFireStations() throws IOException {
 
-        FireStation fireStation = new FireStation();
-        fireStation.setStation("1");
-        fireStation.setAddress("5 rue Lauth");
+        List<FireStation> actual = service.getFireStation();
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
+        List<FireStation> expected = this.readJsonFile.readFile().getFirestations();
 
-
-        when(writeJsonFile.writeFileFireStation(fireStations)).thenReturn(fireStation);
-        List<FireStation> actualFireStation = fireStationService.getFireStation();
-
-        Assertions.assertEquals(1, actualFireStation.size());
+        Assertions.assertEquals(expected.size(), actual.size());
     }
 
     @Test
-    public void getPersonByStation() throws IOException {
+    @DisplayName("Should return a list of all persons living at the address covered by the given fire station")
+    public void getPersonsByStation() throws IOException {
+        Map<String,Object> actual = service.getPersonsByStation("2");
 
-        FireStation fireStation = new FireStation();
-        fireStation.setStation("1");
-        fireStation.setAddress("5 rue Lauth");
-
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
-
-        when(writeJsonFile.writeFileFireStation(fireStations)).thenReturn(fireStation);
-        Map<String, Object> actualFireStation = fireStationService.getPersonsByStation(fireStation.getStation());
-
-        Assertions.assertEquals(3, actualFireStation.size());
+        Assertions.assertEquals(3, actual.size());
     }
 }

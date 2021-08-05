@@ -9,7 +9,6 @@ import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 

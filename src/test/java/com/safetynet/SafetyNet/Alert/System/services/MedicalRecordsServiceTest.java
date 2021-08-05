@@ -1,6 +1,5 @@
 package com.safetynet.SafetyNet.Alert.System.services;
 
-import com.safetynet.SafetyNet.Alert.System.model.DataModel;
 import com.safetynet.SafetyNet.Alert.System.model.MedicalRecords;
 import com.safetynet.SafetyNet.Alert.System.util.ReadJsonFile;
 import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
@@ -10,46 +9,33 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.mockito.Mockito.when;
+import java.util.stream.Collectors;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class MedicalRecordsServiceTest {
 
     @InjectMocks
-     MedicalRecordsService medicalRecordsService;
-    @Mock
+     MedicalRecordsService service;
+    @Autowired
      ReadJsonFile readJsonFile;
-    @Mock
+    @Autowired
      WriteJsonFile writeJsonFile;
 
     @BeforeEach
     private void setUpPerTest() {
         try {
-            MedicalRecords medicalRecord = new MedicalRecords();
-            medicalRecord.setFirstName("Adam");
-            medicalRecord.setLastName("Decarte");
-            medicalRecord.setBirthdate("08/28/1992");
-
-            List<MedicalRecords> medicalRecordsList = new ArrayList<>();
-            medicalRecordsList.add(medicalRecord);
-
-            DataModel dataModel = new DataModel();
-            dataModel.setMedicalrecords(medicalRecordsList);
-
-            when(readJsonFile.readFile()).thenReturn(dataModel);
-
-
-            medicalRecordsService = new MedicalRecordsService(readJsonFile, writeJsonFile);
+            service = new MedicalRecordsService(readJsonFile, writeJsonFile);
         } catch (Exception e) {
             e.printStackTrace();
             throw  new RuntimeException("Failed to set up test mock objects");
@@ -59,122 +45,180 @@ public class MedicalRecordsServiceTest {
 
 
     @Test
-    public void shouldReturnMedicalRecords() throws IOException {
+    @DisplayName("Should return medical record")
+    public void saveMedicalRecord() throws IOException {
 
         MedicalRecords medicalRecord = new MedicalRecords();
-        medicalRecord.setFirstName("Adam");
-        medicalRecord.setLastName("Decarte");
-        medicalRecord.setBirthdate("08/28/1992");
+        medicalRecord.setFirstName("Test");
+        medicalRecord.setLastName("Tester");
+        medicalRecord.setBirthdate("03/06/1984");
+        medicalRecord.setMedications(List.of("aznol:350mg", "hydrapermazol:100mg"));
+        medicalRecord.setAllergies(List.of("nillacilan"));
 
-        List<MedicalRecords> medicalRecordsList = new ArrayList<>();
-        medicalRecordsList.add(medicalRecord);
+        MedicalRecords actual = service.saveMedicalRecords(medicalRecord);
 
-        when(writeJsonFile.writeFileMedicalRecords(medicalRecordsList)).thenReturn(medicalRecord);
-        MedicalRecords actual = medicalRecordsService.saveMedicalRecords(medicalRecord);
+        MedicalRecords addedMR = this.readJsonFile.readFile().getMedicalrecords().get(this.readJsonFile.readFile().getMedicalrecords().size() -1);
 
-        Assertions.assertEquals(medicalRecord, actual);
+        Assertions.assertEquals(addedMR.getFirstName(), actual.getFirstName());
+        Assertions.assertEquals(addedMR.getLastName(), actual.getLastName());
+
+        /* Delete*/
+        this.service.deleteMedicalRecords(medicalRecord.getFirstName(), medicalRecord.getLastName());
     }
 
-    /*@Test
+    //@Test
+    @DisplayName("Should return NULL because medical record already exist in JSON file")
     public void saveMedicalRecordIfExist() throws IOException {
 
-        MedicalRecords medicalRecord = new MedicalRecords();
-        medicalRecord.setFirstName("Eric");
-        medicalRecord.setLastName("Cadigan");
-        medicalRecord.setBirthdate("03/06/1994");
-        medicalRecord.setMedications(new ArrayList<>());
-        medicalRecord.setAllergies(new ArrayList<>());
+        List<String> medications = new ArrayList<>();
+        medications.add("aznol:350mg");
+        medications.add("hydrapermazol:100mg");
 
-
-        List<MedicalRecords> medicalRecordsList = new ArrayList<>();
-        medicalRecordsList.add(medicalRecord);
-
-        when(writeJsonFile.writeFileMedicalRecords(medicalRecordsList)).thenReturn(medicalRecord);
-        MedicalRecords actual = medicalRecordsService.saveMedicalRecords(medicalRecord);
-
-        Assertions.assertEquals(medicalRecord, actual);
-    }*/
-
-    @Test
-    public void updatePerson() throws IOException {
+        List<String> allergies = new ArrayList<>();
+        allergies.add("nillacilan");
 
         MedicalRecords medicalRecord = new MedicalRecords();
-        medicalRecord.setFirstName("Adam");
-        medicalRecord.setLastName("Decarte");
-        medicalRecord.setBirthdate("08/28/1992");
+        medicalRecord.setFirstName("John");
+        medicalRecord.setLastName("Boyd");
+        medicalRecord.setBirthdate("03/06/1984");
+        medicalRecord.setMedications(medications);
+        medicalRecord.setAllergies(allergies);
 
-        List<MedicalRecords> medicalRecordsList = new ArrayList<>();
-        medicalRecordsList.add(medicalRecord);
+        MedicalRecords actual = service.saveMedicalRecords(medicalRecord);
 
-        when(writeJsonFile.writeFileMedicalRecords(medicalRecordsList)).thenReturn(medicalRecord);
+        Assertions.assertNull(actual);
+    }
 
-        MedicalRecords actual = medicalRecordsService.updateMedicalRecords(medicalRecord, medicalRecord.getFirstName(), medicalRecord.getLastName());
+    //@Test
+    @DisplayName("Should return updated person")
+    public void updateMedical() throws IOException {
 
-        Assertions.assertEquals(medicalRecord, actual);
+        MedicalRecords medicalRecord = new MedicalRecords();
+        medicalRecord.setFirstName("John");
+        medicalRecord.setLastName("Boyd");
+        medicalRecord.setBirthdate("03/06/1984");
+        medicalRecord.setMedications(List.of("aznol:350mg", "hydrapermazol:100mg", "doliprane"));
+        medicalRecord.setAllergies(List.of("nillacilan"));
+
+        MedicalRecords medicalPrev = new MedicalRecords();
+        medicalPrev.setFirstName("John");
+        medicalPrev.setLastName("Boyd");
+        medicalPrev.setBirthdate("03/06/1984");
+        medicalPrev.setMedications(List.of("aznol:350mg", "hydrapermazol:100mg"));
+        medicalPrev.setAllergies(List.of("nillacilan"));
+
+        MedicalRecords actual = service.updateMedicalRecords(medicalRecord, medicalRecord.getFirstName(), medicalRecord.getLastName());
+
+        List<MedicalRecords> expected = this.readJsonFile.readFile().getMedicalrecords()
+                .stream()
+                .filter(f -> f.getFirstName().equals(medicalRecord.getFirstName())
+                        &&
+                        f.getLastName().equals(medicalRecord.getLastName()))
+                .collect(Collectors.toList());
+
+        Assertions.assertEquals(expected.get(0), actual);
+
+        service.updateMedicalRecords(medicalPrev, medicalPrev.getFirstName(), medicalPrev.getLastName());
     }
 
 
+    //@Test
+    @DisplayName("Should return empty if the medical record doesn't exist")
     public void ShouldReturnEmpty() throws IOException {
 
         MedicalRecords medicalRecord = new MedicalRecords();
-        medicalRecord.setFirstName("Adam");
-        medicalRecord.setLastName("Decarte");
-        medicalRecord.setBirthdate("08/28/1992");
+        medicalRecord.setFirstName("John");
+        medicalRecord.setLastName("Boyd");
+        medicalRecord.setBirthdate("03/06/1984");
+        medicalRecord.setMedications(List.of("aznol:350mg", "hydrapermazol:100mg", "doliprane"));
+        medicalRecord.setAllergies(List.of("nillacilan"));
 
-        List<MedicalRecords> medicalRecordsList = new ArrayList<>();
-        medicalRecordsList.add(medicalRecord);
-
-        MedicalRecords actual = medicalRecordsService.updateMedicalRecords(medicalRecord, "Adam", "D");
+        MedicalRecords actual = service.updateMedicalRecords(medicalRecord, "Théo", "D");
 
         Assertions.assertNull(actual);
     }
 
 
-   /* @Test
-    @DisplayName("Delete Medical record")
-    public void delete() throws IOException {
+    //@Test
+    @DisplayName("Should return empty because person was deleted")
+    public void deletePersonShouldReturnNull() throws IOException {
 
         MedicalRecords medicalRecord = new MedicalRecords();
-        medicalRecord.setFirstName("Clive");
-        medicalRecord.setLastName("Ferguson");
-        medicalRecord.setBirthdate("08/28/1992");
+        medicalRecord.setFirstName("John");
+        medicalRecord.setLastName("Boyd");
+        medicalRecord.setBirthdate("03/06/1984");
+        medicalRecord.setMedications(List.of("aznol:350mg", "hydrapermazol:100mg", "doliprane"));
+        medicalRecord.setAllergies(List.of("nillacilan"));
 
-        List<MedicalRecords> medicalRecordsList = new ArrayList<>();
-        medicalRecordsList.add(medicalRecord);
+        List<MedicalRecords> personList = new ArrayList<>();
+        personList.add(medicalRecord);
 
-        when(writeJsonFile.writeFileMedicalRecords(medicalRecordsList)).thenReturn(medicalRecord);
-        medicalRecordsService.deleteMedicalRecords(medicalRecord.getFirstName(), medicalRecord.getLastName());
+        service.saveMedicalRecords(medicalRecord);
 
-        Assertions.assertEquals(medicalRecordsList.size(),  0);
-    }*/
+        List<MedicalRecords> exist = this.readJsonFile.readFile().getMedicalrecords()
+                .stream()
+                .filter(f -> f.getFirstName().equals(medicalRecord.getFirstName())
+                        &&
+                        f.getLastName().equals(medicalRecord.getLastName()))
+                .collect(Collectors.toList());
+
+        Assertions.assertEquals(personList.get(0), exist.get(0));
+
+        service.deleteMedicalRecords(medicalRecord.getFirstName(), medicalRecord.getLastName());
+
+        List<MedicalRecords> actual = this.readJsonFile.readFile().getMedicalrecords()
+                .stream()
+                .filter(f -> f.getFirstName().equals(medicalRecord.getFirstName())
+                        &&
+                        f.getLastName().equals(medicalRecord.getLastName()))
+                .collect(Collectors.toList());
+
+        Assertions.assertEquals(0,  actual.size());
+    }
+
+    //@Test
+    @DisplayName("Should return null because person doesn't exist")
+    public void deletePersonShouldMatchNull() throws IOException {
+
+        MedicalRecords medicalRecord = new MedicalRecords();
+        medicalRecord.setFirstName("John");
+        medicalRecord.setLastName("Boyd");
+        medicalRecord.setBirthdate("03/06/1984");
+        medicalRecord.setMedications(List.of("aznol:350mg", "hydrapermazol:100mg", "doliprane"));
+        medicalRecord.setAllergies(List.of("nillacilan"));
+
+        /* Ensure that person doesn't exist */
+        List<MedicalRecords> exist = this.readJsonFile.readFile().getMedicalrecords()
+                .stream()
+                .filter(f -> f.getFirstName().equals(medicalRecord.getFirstName())
+                        &&
+                        f.getLastName().equals(medicalRecord.getLastName()))
+                .collect(Collectors.toList());
+
+        /* Should be 0 because person doesn't exist */
+        Assertions.assertEquals(0, exist.size());
+
+        /* Execute delete method */
+        service.deleteMedicalRecords("Théo", "D");
+
+        List<MedicalRecords> actual = this.readJsonFile.readFile().getMedicalrecords()
+                .stream()
+                .filter(f -> f.getFirstName().equals(medicalRecord.getFirstName())
+                        &&
+                        f.getLastName().equals(medicalRecord.getLastName()))
+                .collect(Collectors.toList());
+
+        Assertions.assertEquals(0,  actual.size());
+    }
 
     @Test
     @DisplayName("Get all Medical records from JSON")
     public void getMedicalRecords() throws IOException {
 
-        List<MedicalRecords> medicalRecords = this.medicalRecordsService.getMedicalRecords();
+        List<MedicalRecords> actual = this.service.getMedicalRecords();
 
-        Assertions.assertEquals(medicalRecords.size(), 1);
+        List<MedicalRecords> expected = this.readJsonFile.readFile().getMedicalrecords();
+
+        Assertions.assertEquals(expected.size(), actual.size());
     }
-
-    /*@Test
-    public void shouldReturnListOfPersons() throws IOException {
-
-        Person person = new Person();
-        person.setFirstName("Adam");
-        person.setLastName("Decarte");
-        person.setAddress("5 rue Lauth");
-        person.setZip("67000");
-        person.setCity("Strasbourg");
-        person.setEmail("test@gmail.com");
-        person.setPhone("+6 00 00 00 00");
-
-        List<Person> personList = new ArrayList<>();
-        personList.add(person);
-
-        when(writeJsonFile.writeFilePerson(personList)).thenReturn(person);
-        List<Person> actualPerson = personService.getPersons();
-
-        Assertions.assertEquals(1, actualPerson.size());
-    }*/
 }

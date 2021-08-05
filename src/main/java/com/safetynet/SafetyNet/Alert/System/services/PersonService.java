@@ -71,7 +71,7 @@ public class PersonService {
 
         if (dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName))) {
             dataModel.getPersons().add(person);
-            return this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+            return writeJsonFile.writeFilePerson(dataModel.getPersons());
         }
         return null;
     }
