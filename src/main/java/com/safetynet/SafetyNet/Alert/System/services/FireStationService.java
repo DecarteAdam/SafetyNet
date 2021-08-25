@@ -9,7 +9,6 @@ import com.safetynet.SafetyNet.Alert.System.util.WriteJsonFile;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,6 +23,11 @@ public class FireStationService {
         this.writeJsonFile = writeJsonFile;
     }
 
+    /**
+     * Save a new fire station
+     * @param fireStation The fire station to save
+     * @return Saved fire station
+     */
     public FireStation saveFireStation(FireStation fireStation) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
         if(dataModel.getFirestations().contains(fireStation)){
@@ -34,6 +38,13 @@ public class FireStationService {
         return fireStation;
     }
 
+    /**
+     * Update existing fire station
+     * @param fireStation The fire station to update
+     * @param station The station number
+     * @param address The station address
+     * @return The updated station
+     */
     public FireStation updateFireStation(FireStation fireStation, String station, String address) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
@@ -44,14 +55,24 @@ public class FireStationService {
         return null;
     }
 
+    /**
+     * Get all fire stations from JSON file
+     * @return The list of all fire stations
+     */
     public List<FireStation> getFireStation() throws IOException {
         return readJsonFile.readFile().getFirestations();
     }
 
+    /**
+     * Delete Fire station from JSON file
+     * @param station The station number
+     * @param address The station address
+     * @return If the fire station deleted return fire station else return null
+     */
     public FireStation deleteFireStation(String station, String address) throws IOException {
         DataModel dataModel = this.readJsonFile.readFile();
 
-        if (dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address))){
+        if (dataModel.getFirestations().removeIf(f -> f.getStation().equals(station) && f.getAddress().equals(address))) {
             return this.writeJsonFile.writeFileFireStation(dataModel.getFirestations());
         }
 
@@ -59,7 +80,11 @@ public class FireStationService {
     }
 
 
-
+    /**
+     * Get persons covered by given fire station
+     * @param stationNumber The fire station number
+     * @return The map of persons
+     */
     public Map<String, Object> getPersonsByStation(String stationNumber) throws IOException {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -18);

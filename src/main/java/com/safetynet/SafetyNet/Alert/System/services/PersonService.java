@@ -71,7 +71,7 @@ public class PersonService {
 
         if (dataModel.getPersons().removeIf(f -> f.getFirstName().equals(firstName) && f.getLastName().equals(lastName))) {
             dataModel.getPersons().add(person);
-            return this.writeJsonFile.writeFilePerson(dataModel.getPersons());
+            return writeJsonFile.writeFilePerson(dataModel.getPersons());
         }
         return null;
     }
@@ -236,6 +236,11 @@ public class PersonService {
         return persons;
     }
 
+    /**
+     * Get persons covered by fire stations
+     * @param stations The list of fire stations
+     * @return The map of persons
+     */
     public Map<String,List<PersonWithMedicalRecords>> getPersonsFromFlood(List<String> stations) throws IOException {
         List<PersonWithMedicalRecords> list = new ArrayList<>();
 
@@ -287,6 +292,12 @@ public class PersonService {
 
     }
 
+    /**
+     * Get persons by their first name & last name
+     * @param firstName The person's first name
+     * @param lastName The person's last name
+     * @return The list of persons
+     */
     public List<Object> personInfo(String firstName, String lastName)  throws IOException {
         /* Retrieve persons from given address */
         Map<String, Person> personMap = readJsonFile.readFile().getPersons()
@@ -322,6 +333,11 @@ public class PersonService {
     }
 
 
+    /**
+     * Return emails of all persons living in the given city
+     * @param city The name of the city
+     * @return The list of emails
+     */
     public List<String> communityEmail(String city) throws IOException {
 
         /* Retrieve persons from given city */

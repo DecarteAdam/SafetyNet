@@ -10,14 +10,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class WriteJsonFile {
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    File file = new File("src/main/resources/person2.json");
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final File file = new File("src/main/resources/person2.json");
 
     public Person writeFilePerson(List<Person> person) throws IOException {
 

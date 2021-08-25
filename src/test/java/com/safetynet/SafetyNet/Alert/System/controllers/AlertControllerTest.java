@@ -39,4 +39,26 @@ public class AlertControllerTest {
                 .param("address", "5 rue lauth, 67000 Strasbourg"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    public void floodAlert() throws Exception {
+        mockMvc.perform(get("/flood")
+                        .param("stations", "5"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void personInfo() throws Exception {
+        mockMvc.perform(get("/personInfo")
+                        .param("firstName", "Adam")
+                        .param("lastName", "Decarte"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void communityEmails() throws Exception {
+        mockMvc.perform(get("/communityEmail")
+                        .param("city", "Strasbourg"))
+                .andExpect(status().isOk());
+    }
 }
