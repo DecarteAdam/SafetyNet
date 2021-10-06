@@ -241,7 +241,7 @@ public class PersonService {
      * @param stations The list of fire stations
      * @return The map of persons
      */
-    public Map<String,List<PersonWithMedicalRecords>> getPersonsFromFlood(List<String> stations) throws IOException {
+    public Map<String,List<PersonWithMedicalRecords>> getPersonsFromFlood( List<String> stations) throws IOException {
         List<PersonWithMedicalRecords> list = new ArrayList<>();
 
         //find fireStations by station number
