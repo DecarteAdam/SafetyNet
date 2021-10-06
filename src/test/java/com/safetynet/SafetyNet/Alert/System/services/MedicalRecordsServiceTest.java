@@ -35,8 +35,6 @@ public class MedicalRecordsServiceTest {
     @Autowired
      WriteJsonFile writeJsonFile;
 
-    File testWrite = new File("src/main/resources/test.json");
-    File testRead = new File("src/main/resources/data-test.json");
 
     @BeforeEach
     private void setUpPerTest() {

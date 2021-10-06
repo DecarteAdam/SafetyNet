@@ -16,7 +16,7 @@ import java.util.List;
 public class WriteJsonFile {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final File file = new File("src/main/resources/person2.json");
+    private final File file = new File("src/main/resources/data.json");
 
     public Person writeFilePerson(List<Person> person) throws IOException {
 
@@ -29,7 +29,7 @@ public class WriteJsonFile {
         //configure objectMapper for pretty input
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
-        //write customerObj object to person2.json file
+        //write customerObj object to data.json file
         objectMapper.writeValue(file, dataModel);
 
         return dataModel.getPersons().get(dataModel.getPersons().size() -1);
@@ -46,7 +46,7 @@ public class WriteJsonFile {
         //configure objectMapper for pretty input
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
-        //write customerObj object to person2.json file
+        //write customerObj object to data.json file
         objectMapper.writeValue(file, dataModel);
 
         return dataModel.getFirestations().get(dataModel.getFirestations().size() -1);
@@ -63,7 +63,7 @@ public class WriteJsonFile {
         //configure objectMapper for pretty input
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
-        //write customerObj object to person2.json file
+        //write customerObj object to data.json file
         objectMapper.writeValue(file, dataModel);
 
         return dataModel.getMedicalrecords().get(dataModel.getMedicalrecords().size() -1);

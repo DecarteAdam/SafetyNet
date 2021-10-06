@@ -15,7 +15,7 @@ public class ReadJsonFile {
         //create ObjectMapper instance
         ObjectMapper objectMapper = new ObjectMapper();
 
-        File file = new File("src/main/resources/person2.json");
+        File file = new File("src/main/resources/data.json");
 
         return objectMapper.readValue(file, DataModel.class);
     }
